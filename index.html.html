@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FITZY TOC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
+
+  :root {
+    --green: #00ff88;
+    --green-dim: #00cc66;
+    --amber: #ffaa00;
+    --red: #ff3333;
+    --bg: #060a08;
+    --surface: #0d1410;
+    --surface2: #121a15;
+    --border: #1a2e20;
+    --text: #c8e8d0;
+    --text-dim: #4a6e55;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--green);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-top: 2px;
+  }
+
+  .clock {
+    font-size: 22px;
+    color: var(--amber);
+    font-family: 'Share Tech Mono', monospace;
+    text-align: right;
+  }
+
+  .clock-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-align: right;
+  }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    margin-top: 18px;
+  }
+
+  .btn-grid {
+    display: grid;
+    gap: 6px;
+  }
+
+  .btn-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .btn-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .btn-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 10px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.1s;
+    letter-spacing: 1px;
+    line-height: 1.3;
+  }
+
+  .btn:hover {
+    border-color: var(--green-dim);
+    color: var(--text);
+  }
+
+  .btn.active {
+    background: #001a0d;
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .btn.wide { grid-column: span 2; }
+  .btn.full { grid-column: 1 / -1; }
+
+  /* Vehicle counter */
+  .vehicle-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    margin-bottom: 5px;
+  }
+
+  .vehicle-name {
+    flex: 1;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .vehicle-name.has-count { color: var(--green); }
+
+  .counter-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+  }
+
+  .counter-btn:hover { border-color: var(--green); color: var(--green); }
+
+  .counter-val {
+    font-size: 16px;
+    color: var(--amber);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Preview */
+  .preview-box {
+    background: var(--surface);
+    border: 1px solid var(--green-dim);
+    padding: 14px;
+    margin-top: 20px;
+    position: relative;
+    min-height: 80px;
+  }
+
+  .preview-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    margin-bottom: 10px;
+  }
+
+  .preview-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #fff;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .preview-text.empty {
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  .copy-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--green);
+    color: #000;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 3px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { background: #00ff99; }
+  .copy-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+
+  .copy-btn.copied {
+    background: var(--amber);
+  }
+
+  .reset-btn {
+    width: 100%;
+    margin-top: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Sub-panels */
+  .sub-panel { display: none; }
+  .sub-panel.visible { display: block; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 18px 0;
+  }
+
+  .location-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    width: 100%;
+    letter-spacing: 2px;
+    outline: none;
+    margin-top: 4px;
+  }
+
+  .location-input:focus { border-color: var(--green); }
+  .location-input::placeholder { color: var(--text-dim); font-size: 11px; }
+
+  .scan-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    animation: scan 3s linear infinite;
+    opacity: 0.3;
+    margin: 4px 0;
+  }
+
+  @keyframes scan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .fir-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--amber);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 8px 12px;
+    width: 100%;
+    outline: none;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .fir-input:focus { border-color: var(--amber); }
+  .fir-input::placeholder { color: var(--text-dim); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="title">FITZY TOC</div>
+      <div class="subtitle">FITZY TOC GOON SQUAD</div>
+    </div>
+    <div>
+      <div class="clock" id="clock">----</div>
+      <div class="clock-label">ZULU TIME</div>
+    </div>
+  </div>
+  <div class="scan-line" style="margin-top:10px;"></div>
+</header>
+
+<!-- EVENT TYPE -->
+<div class="section-label">EVENT TYPE</div>
+<div class="btn-grid cols-2">
+  <button class="btn" onclick="selectEvent('VEHICLE_MOVEMENT')" id="ev_VEHICLE_MOVEMENT">VEHICLE MOVEMENT</button>
+  <button class="btn" onclick="selectEvent('EXPLOSION')" id="ev_EXPLOSION">EXPLOSION</button>
+  <button class="btn" onclick="selectEvent('MISSILE')" id="ev_MISSILE">MISSILE</button>
+  <button class="btn" onclick="selectEvent('AIRCRAFT')" id="ev_AIRCRAFT">AIRCRAFT</button>
+  <button class="btn" onclick="selectEvent('SMALL_ARMS')" id="ev_SMALL_ARMS">SMALL ARMS FIRE</button>
+</div>
+
+<!-- VEHICLE MOVEMENT PANEL -->
+<div class="sub-panel" id="panel_VEHICLE_MOVEMENT">
+  <div class="section-label">VEHICLES</div>
+  <div id="vehicleList"></div>
+
+  <div class="section-label">FROM</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectLoc('locFrom','V1')" id="locFrom_V1">V1</button>
+    <button class="btn" onclick="selectLoc('locFrom','V2')" id="locFrom_V2">V2</button>
+    <button class="btn" onclick="selectLoc('locFrom','V4')" id="locFrom_V4">V4</button>
+    <button class="btn" onclick="selectLoc('locFrom','V5')" id="locFrom_V5">V5</button>
+    <button class="btn" onclick="selectLoc('locFrom','B-51')" id="locFrom_B-51">B-51</button>
+    <button class="btn" onclick="selectLoc('locFrom','IDF POS 3')" id="locFrom_IDF POS 3">IDF POS 3</button>
+    <button class="btn wide" onclick="selectLoc('locFrom','VA-11')" id="locFrom_VA-11">VA-11 ROAD</button>
+  </div>
+
+  <div class="section-label">TO</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectLoc('locTo','V1')" id="locTo_V1">V1</button>
+    <button class="btn" onclick="selectLoc('locTo','V2')" id="locTo_V2">V2</button>
+    <button class="btn" onclick="selectLoc('locTo','V4')" id="locTo_V4">V4</button>
+    <button class="btn" onclick="selectLoc('locTo','V5')" id="locTo_V5">V5</button>
+    <button class="btn" onclick="selectLoc('locTo','B-51')" id="locTo_B-51">B-51</button>
+    <button class="btn" onclick="selectLoc('locTo','IDF POS 3')" id="locTo_IDF POS 3">IDF POS 3</button>
+    <button class="btn wide" onclick="selectLoc('locTo','VA-11')" id="locTo_VA-11">VA-11 ROAD</button>
+  </div>
+</div>
+
+<!-- EXPLOSION PANEL -->
+<div class="sub-panel" id="panel_EXPLOSION">
+  <div class="section-label">NUMBER OF EXPLOSIONS</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectSub('expCount','1')" id="expCount_1">1</button>
+    <button class="btn" onclick="selectSub('expCount','2')" id="expCount_2">2</button>
+    <button class="btn" onclick="selectSub('expCount','3')" id="expCount_3">3</button>
+    <button class="btn" onclick="selectSub('expCount','4+')" id="expCount_4+">4+</button>
+  </div>
+
+  <div class="section-label">IVO (LOCATION)</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectLoc('expLoc','V1')" id="expLoc_V1">V1</button>
+    <button class="btn" onclick="selectLoc('expLoc','V2')" id="expLoc_V2">V2</button>
+    <button class="btn" onclick="selectLoc('expLoc','V4')" id="expLoc_V4">V4</button>
+    <button class="btn" onclick="selectLoc('expLoc','V5')" id="expLoc_V5">V5</button>
+    <button class="btn" onclick="selectLoc('expLoc','B-51')" id="expLoc_B-51">B-51</button>
+    <button class="btn" onclick="selectLoc('expLoc','IDF POS 3')" id="expLoc_IDF POS 3">IDF POS 3</button>
+  </div>
+</div>
+
+<!-- MISSILE PANEL -->
+<div class="sub-panel" id="panel_MISSILE">
+  <div class="section-label">TYPE</div>
+  <div class="btn-grid cols-2">
+    <button class="btn" onclick="selectSub('missileType','MISSILE INTERCEPTION')" id="missileType_MISSILE INTERCEPTION">MISSILE INTERCEPTION</button>
+    <button class="btn" onclick="selectSub('missileType','MISSILE IMPACT')" id="missileType_MISSILE IMPACT">MISSILE IMPACT</button>
+    <button class="btn wide" onclick="selectSub('missileType','MISSILE LAUNCH')" id="missileType_MISSILE LAUNCH">MISSILE LAUNCH</button>
+  </div>
+
+  <div class="section-label">NUMBER</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectSub('missileCount','1')" id="missileCount_1">1</button>
+    <button class="btn" onclick="selectSub('missileCount','2')" id="missileCount_2">2</button>
+    <button class="btn" onclick="selectSub('missileCount','3')" id="missileCount_3">3</button>
+    <button class="btn" onclick="selectSub('missileCount','4+')" id="missileCount_4+">4+</button>
+  </div>
+
+  <div class="section-label">LAUNCH POSITION</div>
+  <div class="btn-grid cols-2">
+    <button class="btn" onclick="selectSub('missileLaunch','LAUNCH W425')" id="missileLaunch_LAUNCH W425">LAUNCH W425</button>
+    <button class="btn" onclick="selectSub('missileLaunch','IDF POSITION 3')" id="missileLaunch_IDF POSITION 3">IDF POSITION 3</button>
+    <button class="btn wide" onclick="selectSub('missileLaunch','UNKNOWN LAUNCH POSITION')" id="missileLaunch_UNKNOWN LAUNCH POSITION">UNKNOWN LAUNCH POSITION</button>
+  </div>
+
+  <div class="section-label">IVO (IMPACT / HEADING LOCATION)</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectLoc('missileLoc','V1')" id="missileLoc_V1">V1</button>
+    <button class="btn" onclick="selectLoc('missileLoc','V2')" id="missileLoc_V2">V2</button>
+    <button class="btn" onclick="selectLoc('missileLoc','V4')" id="missileLoc_V4">V4</button>
+    <button class="btn" onclick="selectLoc('missileLoc','V5')" id="missileLoc_V5">V5</button>
+    <button class="btn" onclick="selectLoc('missileLoc','B-51')" id="missileLoc_B-51">B-51</button>
+    <button class="btn" onclick="selectLoc('missileLoc','IDF POS 3')" id="missileLoc_IDF POS 3">IDF POS 3</button>
+  </div>
+</div>
+
+<!-- SMALL ARMS PANEL -->
+<div class="sub-panel" id="panel_SMALL_ARMS">
+  <div class="section-label">ROUND COUNT (APPROX)</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectSub('saRounds','10')" id="saRounds_10">10</button>
+    <button class="btn" onclick="selectSub('saRounds','20')" id="saRounds_20">20</button>
+    <button class="btn" onclick="selectSub('saRounds','30')" id="saRounds_30">30</button>
+    <button class="btn" onclick="selectSub('saRounds','40')" id="saRounds_40">40</button>
+    <button class="btn" onclick="selectSub('saRounds','50')" id="saRounds_50">50</button>
+    <button class="btn" onclick="selectSub('saRounds','60')" id="saRounds_60">60</button>
+    <button class="btn" onclick="selectSub('saRounds','70')" id="saRounds_70">70</button>
+    <button class="btn" onclick="selectSub('saRounds','80')" id="saRounds_80">80</button>
+    <button class="btn" onclick="selectSub('saRounds','90')" id="saRounds_90">90</button>
+    <button class="btn" onclick="selectSub('saRounds','100+')" id="saRounds_100+">100+</button>
+  </div>
+
+  <div class="section-label">IVO (LOCATION)</div>
+  <div class="btn-grid cols-4">
+    <button class="btn" onclick="selectLoc('saLoc','V1')" id="saLoc_V1">V1</button>
+    <button class="btn" onclick="selectLoc('saLoc','V2')" id="saLoc_V2">V2</button>
+    <button class="btn" onclick="selectLoc('saLoc','V4')" id="saLoc_V4">V4</button>
+    <button class="btn" onclick="selectLoc('saLoc','V5')" id="saLoc_V5">V5</button>
+    <button class="btn" onclick="selectLoc('saLoc','B-51')" id="saLoc_B-51">B-51</button>
+    <button class="btn" onclick="selectLoc('saLoc','IDF POS 3')" id="saLoc_IDF POS 3">IDF POS 3</button>
+  </div>
+</div>
+
+<!-- AIRCRAFT PANEL -->
+<div class="sub-panel" id="panel_AIRCRAFT">
+  <div class="section-label">AIRCRAFT TYPE</div>
+  <div class="btn-grid cols-2">
+    <button class="btn" onclick="selectAircraft('DRONE')" id="ac_DRONE">DRONE</button>
+    <button class="btn" onclick="selectAircraft('FIGHTER JET')" id="ac_FIGHTER JET">FIGHTER JET</button>
+  </div>
+
+  <!-- DRONE sub-options -->
+  <div class="sub-panel" id="drone_panel">
+    <div class="section-label">NUMBER</div>
+    <div class="btn-grid cols-4">
+      <button class="btn" onclick="selectSub('droneCount','1')" id="droneCount_1">1</button>
+      <button class="btn" onclick="selectSub('droneCount','2')" id="droneCount_2">2</button>
+      <button class="btn" onclick="selectSub('droneCount','3')" id="droneCount_3">3</button>
+      <button class="btn" onclick="selectSub('droneCount','4+')" id="droneCount_4+">4+</button>
+    </div>
+    <div class="section-label">IVO (LOCATION)</div>
+    <div class="btn-grid cols-4">
+      <button class="btn" onclick="selectLoc('droneLoc','V1')" id="droneLoc_V1">V1</button>
+      <button class="btn" onclick="selectLoc('droneLoc','V2')" id="droneLoc_V2">V2</button>
+      <button class="btn" onclick="selectLoc('droneLoc','V4')" id="droneLoc_V4">V4</button>
+      <button class="btn" onclick="selectLoc('droneLoc','V5')" id="droneLoc_V5">V5</button>
+      <button class="btn" onclick="selectLoc('droneLoc','B-51')" id="droneLoc_B-51">B-51</button>
+      <button class="btn" onclick="selectLoc('droneLoc','IDF POS 3')" id="droneLoc_IDF POS 3">IDF POS 3</button>
+    </div>
+    <div class="section-label">DIRECTION</div>
+    <div class="btn-grid cols-3">
+      <button class="btn" onclick="selectSub('droneDir','NORTH')" id="droneDir_NORTH">N</button>
+      <button class="btn" onclick="selectSub('droneDir','NORTHEAST')" id="droneDir_NORTHEAST">NE</button>
+      <button class="btn" onclick="selectSub('droneDir','EAST')" id="droneDir_EAST">E</button>
+      <button class="btn" onclick="selectSub('droneDir','SOUTHEAST')" id="droneDir_SOUTHEAST">SE</button>
+      <button class="btn" onclick="selectSub('droneDir','SOUTH')" id="droneDir_SOUTH">S</button>
+      <button class="btn" onclick="selectSub('droneDir','SOUTHWEST')" id="droneDir_SOUTHWEST">SW</button>
+      <button class="btn" onclick="selectSub('droneDir','WEST')" id="droneDir_WEST">W</button>
+      <button class="btn" onclick="selectSub('droneDir','NORTHWEST')" id="droneDir_NORTHWEST">NW</button>
+      <button class="btn" onclick="selectSub('droneDir','UNKNOWN')" id="droneDir_UNKNOWN">UNKNOWN</button>
+    </div>
+  </div>
+
+  <!-- FIGHTER JET sub-options -->
+  <div class="sub-panel" id="jet_panel">
+    <div class="section-label">NUMBER</div>
+    <div class="btn-grid cols-4">
+      <button class="btn" onclick="selectSub('jetCount','1')" id="jetCount_1">1</button>
+      <button class="btn" onclick="selectSub('jetCount','2')" id="jetCount_2">2</button>
+      <button class="btn" onclick="selectSub('jetCount','3')" id="jetCount_3">3</button>
+      <button class="btn" onclick="selectSub('jetCount','4+')" id="jetCount_4+">4+</button>
+    </div>
+    <div class="section-label">IVO (LOCATION)</div>
+    <div class="btn-grid cols-4">
+      <button class="btn" onclick="selectLoc('jetLoc','V1')" id="jetLoc_V1">V1</button>
+      <button class="btn" onclick="selectLoc('jetLoc','V2')" id="jetLoc_V2">V2</button>
+      <button class="btn" onclick="selectLoc('jetLoc','V4')" id="jetLoc_V4">V4</button>
+      <button class="btn" onclick="selectLoc('jetLoc','V5')" id="jetLoc_V5">V5</button>
+      <button class="btn" onclick="selectLoc('jetLoc','B-51')" id="jetLoc_B-51">B-51</button>
+      <button class="btn" onclick="selectLoc('jetLoc','IDF POS 3')" id="jetLoc_IDF POS 3">IDF POS 3</button>
+    </div>
+    <div class="section-label">ALTITUDE</div>
+    <div class="btn-grid cols-3">
+      <button class="btn" onclick="selectSub('jetAlt','LOW')" id="jetAlt_LOW">LOW</button>
+      <button class="btn" onclick="selectSub('jetAlt','MEDIUM')" id="jetAlt_MEDIUM">MEDIUM</button>
+      <button class="btn" onclick="selectSub('jetAlt','HIGH')" id="jetAlt_HIGH">HIGH</button>
+      <button class="btn full" onclick="selectSub('jetAlt','UNKNOWN')" id="jetAlt_UNKNOWN">ALTITUDE UNKNOWN</button>
+    </div>
+    <div class="section-label">DIRECTION</div>
+    <div class="btn-grid cols-3">
+      <button class="btn" onclick="selectSub('jetDir','NORTH')" id="jetDir_NORTH">N</button>
+      <button class="btn" onclick="selectSub('jetDir','NORTHEAST')" id="jetDir_NORTHEAST">NE</button>
+      <button class="btn" onclick="selectSub('jetDir','EAST')" id="jetDir_EAST">E</button>
+      <button class="btn" onclick="selectSub('jetDir','SOUTHEAST')" id="jetDir_SOUTHEAST">SE</button>
+      <button class="btn" onclick="selectSub('jetDir','SOUTH')" id="jetDir_SOUTH">S</button>
+      <button class="btn" onclick="selectSub('jetDir','SOUTHWEST')" id="jetDir_SOUTHWEST">SW</button>
+      <button class="btn" onclick="selectSub('jetDir','WEST')" id="jetDir_WEST">W</button>
+      <button class="btn" onclick="selectSub('jetDir','NORTHWEST')" id="jetDir_NORTHWEST">NW</button>
+      <button class="btn" onclick="selectSub('jetDir','UNKNOWN')" id="jetDir_UNKNOWN">UNKNOWN</button>
+    </div>
+    <div style="margin-top:8px;">
+      <button class="btn full active" onclick="toggleJetUnknown()" id="jetUnknownBtn">ALT & DIRECTION UNKNOWN</button>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- PREVIEW -->
+<div class="preview-label">▶ MESSAGE PREVIEW</div>
+<div class="preview-box">
+  <div class="preview-text empty" id="previewText">SELECT EVENT TYPE TO BEGIN...</div>
+</div>
+
+<button class="copy-btn" id="copyBtn" onclick="copyMessage()" disabled>COPY TO CLIPBOARD</button>
+<button class="reset-btn" onclick="resetAll()">⟳ RESET</button>
+
+<script>
+  const VEHICLES = ['BUGGY','HUMVEE','LORRY','FORD RANGER','EXCAVATOR','MERKAVA'];
+
+  let state = {
+    event: null,
+    vehicles: {},
+    locFrom: '', locTo: '',
+    expCount: null, expLoc: '',
+    missileType: null, missileCount: null, missileLoc: '', missileLaunch: null,
+    aircraft: null,
+    droneCount: null, droneLoc: '', droneDir: null,
+    jetCount: null, jetLoc: '', jetAlt: null, jetDir: null,
+    jetAllUnknown: false,
+    saRounds: null, saLoc: ''
+  };
+
+  // Clock - local military time (HHMM)
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = h + m;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+
+  function getTime() {
+    const now = new Date();
+    return String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+  }
+
+  // Build vehicle list
+  function buildVehicleList() {
+    const el = document.getElementById('vehicleList');
+    el.innerHTML = '';
+    VEHICLES.forEach(v => {
+      const count = state.vehicles[v] || 0;
+      const div = document.createElement('div');
+      div.className = 'vehicle-item';
+      div.innerHTML = `
+        <span class="vehicle-name ${count > 0 ? 'has-count' : ''}" id="vname_${v}">${v}</span>
+        <button class="counter-btn" onclick="changeVehicle('${v}',-1)">−</button>
+        <span class="counter-val" id="vcount_${v}">${count || '0'}</span>
+        <button class="counter-btn" onclick="changeVehicle('${v}',1)">+</button>
+      `;
+      el.appendChild(div);
+    });
+  }
+
+  function changeVehicle(v, delta) {
+    state.vehicles[v] = Math.max(0, (state.vehicles[v] || 0) + delta);
+    document.getElementById('vcount_'+v).textContent = state.vehicles[v] || '0';
+    document.getElementById('vname_'+v).className = 'vehicle-name' + (state.vehicles[v] > 0 ? ' has-count' : '');
+    buildMessage();
+  }
+
+  function selectEvent(ev) {
+    state.event = ev;
+    document.querySelectorAll('[id^="ev_"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('ev_'+ev).classList.add('active');
+    document.querySelectorAll('.sub-panel[id^="panel_"]').forEach(p => p.classList.remove('visible'));
+    document.getElementById('panel_'+ev).classList.add('visible');
+    buildMessage();
+  }
+
+  function selectLoc(key, val) {
+    state[key] = val;
+    const prefix = key + '_';
+    document.querySelectorAll('[id^="'+prefix+'"]').forEach(b => b.classList.remove('active'));
+    const el = document.getElementById(prefix+val);
+    if (el) el.classList.add('active');
+    buildMessage();
+  }
+
+  function selectSub(key, val) {
+    state[key] = val;
+    const prefix = key + '_';
+    document.querySelectorAll('[id^="'+prefix+'"]').forEach(b => b.classList.remove('active'));
+    const el = document.getElementById(prefix+val);
+    if (el) el.classList.add('active');
+    buildMessage();
+  }
+
+  function selectAircraft(type) {
+    state.aircraft = type;
+    document.querySelectorAll('[id^="ac_"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('ac_'+type).classList.add('active');
+    document.getElementById('drone_panel').classList.remove('visible');
+    document.getElementById('jet_panel').classList.remove('visible');
+    if (type === 'DRONE') document.getElementById('drone_panel').classList.add('visible');
+    if (type === 'FIGHTER JET') document.getElementById('jet_panel').classList.add('visible');
+    buildMessage();
+  }
+
+  function toggleJetUnknown() {
+    state.jetAllUnknown = !state.jetAllUnknown;
+    const btn = document.getElementById('jetUnknownBtn');
+    if (state.jetAllUnknown) {
+      btn.classList.add('active');
+      // clear alt/dir
+      state.jetAlt = 'UNKNOWN'; state.jetDir = 'UNKNOWN';
+      document.querySelectorAll('[id^="jetAlt_"],[id^="jetDir_"]').forEach(b => b.classList.remove('active'));
+    } else {
+      btn.classList.remove('active');
+      state.jetAlt = null; state.jetDir = null;
+    }
+    buildMessage();
+  }
+
+  function buildMessage() {
+    let msg = '';
+    const firLine = 'UPDATE TO FIR#';
+    const time = getTime();
+
+    if (!state.event) {
+      showPreview('', false);
+      return;
+    }
+
+    if (state.event === 'VEHICLE_MOVEMENT') {
+      const vList = Object.entries(state.vehicles)
+        .filter(([,c]) => c > 0)
+        .map(([v,c]) => c + 'X ' + v);
+
+      if (!vList.length || !state.locFrom || !state.locTo) {
+        showPreview(firLine + '\n\n' + time + ' UNP 6-52 REPORTED ...', true);
+        return;
+      }
+
+      msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED ' + vList.join(', ') + ' TRAVELLING FROM ' + state.locFrom + ' TO ' + state.locTo;
+
+    } else if (state.event === 'EXPLOSION') {
+      if (!state.expCount) {
+        showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+        return;
+      }
+      msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED X' + state.expCount + ' EXPLOSION' + (state.expCount !== '1' ? 'S' : '') + (state.expLoc ? ' IVO ' + state.expLoc : '');
+
+    } else if (state.event === 'MISSILE') {
+      if (!state.missileType || !state.missileCount) {
+        showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+        return;
+      }
+      if (state.missileType === 'MISSILE LAUNCH') {
+        msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED X' + state.missileCount + ' MISSILE LAUNCH' + (state.missileLaunch ? ' FROM ' + state.missileLaunch : '') + (state.missileLoc ? ' HEADING IVO ' + state.missileLoc : '');
+      } else {
+        msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED X' + state.missileCount + ' ' + state.missileType + (state.missileLaunch ? ', ' + state.missileLaunch : '') + (state.missileLoc ? ' IVO ' + state.missileLoc : '');
+      }
+
+    } else if (state.event === 'AIRCRAFT') {
+      if (!state.aircraft) {
+        showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+        return;
+      }
+
+      if (state.aircraft === 'DRONE') {
+        if (!state.droneCount) {
+          showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+          return;
+        }
+        msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED X' + state.droneCount + ' DRONE' + (state.droneCount !== '1' ? 'S' : '');
+        if (state.droneLoc) msg += ' IVO ' + state.droneLoc;
+        if (state.droneDir) msg += ', DIRECTION ' + state.droneDir;
+
+      } else if (state.aircraft === 'FIGHTER JET') {
+        if (!state.jetCount) {
+          showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+          return;
+        }
+        msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED X' + state.jetCount + ' FIGHTER JET' + (state.jetCount !== '1' ? 'S' : '');
+        if (state.jetLoc) msg += ' IVO ' + state.jetLoc;
+        if (state.jetAllUnknown) {
+          msg += ', ALTITUDE AND DIRECTION UNKNOWN';
+        } else {
+          if (state.jetAlt) msg += ', ALTITUDE ' + state.jetAlt;
+          if (state.jetDir) msg += ', DIRECTION ' + state.jetDir;
+        }
+      }
+    } else if (state.event === 'SMALL_ARMS') {
+      if (!state.saRounds || !state.saLoc) {
+        showPreview(firLine + '\n\n' + time + ' UNP 6-52 ...', true);
+        return;
+      }
+      msg = firLine + '\n' + time + '\nUNP 6-52 REPORTED SMALL ARMS FIRE HEARD IVO ' + state.saLoc + ', ' + state.saRounds + ' ROUNDS';
+    }
+
+    showPreview(msg, true);
+  }
+
+  function showPreview(text, ready) {
+    const el = document.getElementById('previewText');
+    const btn = document.getElementById('copyBtn');
+    if (!text || !ready) {
+      el.className = 'preview-text empty';
+      el.textContent = text || 'SELECT EVENT TYPE TO BEGIN...';
+      btn.disabled = true;
+    } else {
+      el.className = 'preview-text';
+      el.textContent = text;
+      btn.disabled = false;
+    }
+  }
+
+  function copyMessage() {
+    const text = document.getElementById('previewText').textContent;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✓ COPIED';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'COPY TO CLIPBOARD';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function resetAll() {
+    state = {
+      event: null, vehicles: {},
+      locFrom: '', locTo: '',
+      expCount: null, expLoc: '',
+      missileType: null, missileCount: null, missileLoc: '', missileLaunch: null,
+      aircraft: null,
+      droneCount: null, droneLoc: '', droneDir: null,
+      jetCount: null, jetLoc: '', jetAlt: null, jetDir: null,
+      jetAllUnknown: false,
+      saRounds: null, saLoc: ''
+    };
+    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('visible'));
+    buildVehicleList();
+    showPreview('', false);
+  }
+
+  // Init
+  buildVehicleList();
+</script>
+</body>
+</html>
